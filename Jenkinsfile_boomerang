@@ -9,13 +9,11 @@ pipeline {
                 sh 'rm -rf dist'
                 git branch: 'dev', credentialsId: 'gitlab-jenkins-lightsail', url: '${BOOMERANG_REPO_URL}'
                 sh 'yarn install'
-                //sh 'npm install npm-run-all --save-dev'
             }
         }
         stage('Building') {
             steps {
                 sh 'yarn build'
-                //sh 'npm install npm-run-all --save-dev'
             }
         }        
         stage('Archiving') {
