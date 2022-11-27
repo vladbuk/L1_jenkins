@@ -23,7 +23,7 @@ pipeline {
         }
         
         stage('Deploying') {
-            steps {
+            steps {
                 script{
                     sh "zip -r dist.zip dist/*"
                      
