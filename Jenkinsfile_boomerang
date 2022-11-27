@@ -23,33 +23,31 @@ pipeline {
         }
         
         stage('Deploying') {
-            steps {
-                script{
-                    sh "zip -r dist.zip dist/*"
-                     
-                    echo 'Local files.....'       
-                    sh 'ls -l'
- 
-                    command='''
-                        unzip -o -d ./ dist.zip
-                        ls -l
-                        date                        
-                    '''
-                         
-                   // Copy file to remote server 
-                  sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
-                    transfers: [ sshTransfer(flatten: false,
-                                 remoteDirectory: '/var/www/html',
-                                 sourceFiles: 'dist.zip'
-                    )])
-                  ])
-                   
-                  // Execute commands
-                  sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
-                    transfers: [ sshTransfer(execCommand: command    )])])
-                     
-                }
-            }
-        }
+            steps {
+                script{
+                    sh "zip -r dist.zip dist/*"
+                    echo 'Local files.....'
+                    sh 'ls -l'
+                    
+                    command='''
+                        unzip -o -d ./ dist.zip
+                        ls -l
+                        date
+                    '''
+                    
+                    // Copy file to remote server 
+                    sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
+                    transfers: [ sshTransfer(flatten: false,
+                        remoteDirectory: '/var/www/html',
+                        sourceFiles: 'dist.zip'
+                        )])
+                    ])
+
+                    // Execute commands
+                    sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
+                        transfers: [ sshTransfer(execCommand: command    )])])
+                }
+            }
+        }
     }
 }
