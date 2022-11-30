@@ -1,11 +1,10 @@
 pipeline {
-    agent {
-        docker { image 'node:14' }
-    }
+    agent any
 
     stages {
         stage('Preparing') {
             steps {
+                echo 'Preparing'
                 sh 'rm -rf dist'
                 git branch: 'dev', credentialsId: 'gitlab-jenkins-lightsail', url: '${BOOMERANG_REPO_URL}'
                 sh 'yarn install'
@@ -13,7 +12,8 @@ pipeline {
         }
         stage('Building') {
             steps {
-                sh 'yarn build'
+                echo 'Building'
+                sh 'yarn generate'
             }
         }        
         stage('Archiving') {
@@ -30,22 +30,29 @@ pipeline {
                     sh 'ls -l'
                     
                     command='''
+                        cd /var/www/html
+                        rm -rf dist/
                         unzip -o -d ./ dist.zip
                         ls -l
                         date
                     '''
                     
+                    // Set access owner
+                    //sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test', verbose: 'true',
+                    //    transfers: [ sshTransfer(execCommand: 'sudo chown ubuntu:ubuntu /var/www/html' )])])
+                    
                     // Copy file to remote server 
-                    sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
+                    sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test', verbose: 'true',
                     transfers: [ sshTransfer(flatten: false,
-                        remoteDirectory: '/var/www/html',
-                        sourceFiles: 'dist.zip'
+                        //remoteDirectory: '/',
+                        sourceFiles: 'dist.zip',
+                        execCommand: command
                         )])
                     ])
 
                     // Execute commands
-                    sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
-                        transfers: [ sshTransfer(execCommand: command    )])])
+                    //sshPublisher(publishers: [sshPublisherDesc(configName: 't2micro_ubuntu_test',
+                    //    transfers: [ sshTransfer(execCommand: command )])])
                 }
             }
         }
